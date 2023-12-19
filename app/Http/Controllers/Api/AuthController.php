@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use DB;
 
 class AuthController extends Controller
 {
@@ -74,14 +75,39 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        p($request->all());
-        return response()->json(['user' => $user], 200);
+        $user_id  = $request->token_id;
+        $user = User::where('id',$user_id)->first();
+        if($user){
+            $data = $user;
+            $msg = "User Fetched Sucessfully";
+            $status = 200;
+        } 
+        else{
+            $data = [];
+            $msg = "User could not be Fetched";
+            $status = 401;
+        }
+        return $this->response($data,$status,$msg);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
-        return response()->json(['message' => 'Successfully logged out'], 200);
+        $auth_id  = $request->id_auth;
+        $suceess = DB::table('oauth_access_tokens')
+                    ->where('id', $auth_id)
+                    ->update(['revoked' => 1]);
+        if($suceess){
+            $data = [];
+            $msg = "Successfully logged out";
+            $status = 200;
+        } 
+        else{
+            $data = [];
+            $msg = "Failed to logged out";
+            $status = 401;
+        }
+
+        return $this->response($data,$status,$msg);
     }
 }
 

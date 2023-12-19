@@ -20,8 +20,6 @@ class CustomAuthenticate
      */
     public function handle($request, Closure $next)
     {
-        // $access_token = $request->header('Authorization');
-        // $auth_header = explode(' ', $access_token);
         try{
             $token = $request->bearerToken();
             $token_parts = explode('.', $token);        
@@ -32,18 +30,19 @@ class CustomAuthenticate
             $user_token = $token_header_array['jti'] ?? '';        
             $user_id = DB::table('oauth_access_tokens')
                         ->where('id', $user_token)
+                        ->where('revoked', 0)
                         ->pluck('user_id')
                         ->first();
             if($user_id){
-                $request->merge(['id' => $user_id]);
+                $request->merge(['token_id' => $user_id, 'id_auth' => $user_token]);
                 return $next($request);
             }
             else{
-                return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Token or Input Type.']], 401);
+                return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Token']], 401);
             }
         }
         catch (\Exception $exception) {
-            return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Token or Input Type.']], 401);
+            return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Input Type']], 401);
         }
         
     }

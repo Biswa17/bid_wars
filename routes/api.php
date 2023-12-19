@@ -27,5 +27,6 @@ Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'sf/v1', 'middl
 Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => '', 'middleware' => ['api']], function () {
     Route::post('/register', 'AuthController@register');
     Route::post('/login', 'AuthController@login');
+    Route::post('/logout', 'AuthController@logout')->middleware('custom_auth');
     Route::get('/user', 'AuthController@user')->middleware('custom_auth');
 });
