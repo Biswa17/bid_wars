@@ -38,11 +38,20 @@ class CustomAuthenticate
                 return $next($request);
             }
             else{
-                return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Token']], 401);
+                $data = ["INVALID_TOKEN"];
+                $status = 401;
+                $message = 'Invalid Token';
+                $response = array('status'=>'failed','status_code'=>$status,'message'=>$message,'response'=>array('errors'=>$data));
+                return response()->json($response,200);
             }
         }
         catch (\Exception $exception) {
-            return response(['error' => ['code' => 'INVALID_TOKEN','description' => 'Invalid Input Type']], 401);
+            $data = ['INVALID_TOKEN'];
+            $status = 401;
+            $message = 'Invalid Input Type';
+            $response = array('status'=>'failed','status_code'=>$status,'message'=>$message,'response'=>array('errors'=>$data));
+            return response()->json($response,200);
+            
         }
         
     }
