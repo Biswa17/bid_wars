@@ -90,8 +90,16 @@ class UserController extends Controller
     {   
         try{
             $id  = $request->token_id;
+            $profile = Profile::where('user_id', $id)->first();
             $rules = [
-                    'profile_pic' => 'image'];
+                'profile_pic' => 'image',
+            ];
+
+            if (!$profile) {
+                $rules['first_name'] = 'required|string';
+                $rules['last_name'] = 'required|string';
+            }
+            
             
             $validator = Validator::make($request->all(), $rules);
             
@@ -111,7 +119,18 @@ class UserController extends Controller
                     $path = 'images/profile_picture/' . $imageName;
                     $data['profile_pic'] = $path;
                 }
-                $profile = Profile::where('user_id', $id)->first();
+                if ($request->has('first_name')) {
+                    $data['first_name'] = $request->input('first_name');
+                }
+
+                if ($request->has('last_name')) {
+                    $data['last_name'] = $request->input('last_name');
+                }
+
+                if ($request->has('phone_number')) {
+                    $data['phone_number'] = $request->input('phone_number');
+                }
+
                 if($profile){
                     $profile->update($data);
                 }
@@ -150,7 +169,89 @@ class UserController extends Controller
         //
     }
 
-    public function update_address(Request $request){
+    public function add_new_address(Request $request){
+        try{
+            $user_id  = $request->token_id;
+            $rules = [
+                'state'   => 'required',
+                'city'    => 'required',
+                'pin'     => 'required',
+                'address' => 'required',
+            ];
 
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                $data['validation_errors'] = $errors;
+                $status = 422;
+                $msg = "Validation error";
+            }
+            else{
+                $data = $request->all();
+                $data['user_id'] = $user_id;
+                $profile_address = ProfileAddress::create($data);
+
+                $data = $profile_address;
+                $msg = "Address added successfully";
+                $status = 200;
+            }
+        }
+        catch (\Exception $e) {
+            $data = [];
+            $status = 500;
+            $msg = 'Error occurred while createing address';
+
+            // Log the error for debugging purposes
+            \Log::error('Error occurred while createing address.', [
+                'message' => $e->getMessage(),
+                'function called' => 'UserController::add_new_address',
+            ]);
+        }
+        
+        return $this->response($data,$status,$msg);
+    }
+
+    public function update_address(Request $request, $id){
+        try{
+            $rules = [];
+
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                $data['validation_errors'] = $errors;
+                $status = 422;
+                $msg = "Validation error";
+            }
+            else{
+                $address = ProfileAddress::where('id',$id)->first();
+
+                if($address){
+                    $address->update($request->all());
+                    $data = $address;
+                    $msg = "Address updated sucessfully";
+                    $status = 200;
+                }
+                else{
+                    $data = [];
+                    $msg = "Address doesnt exist";
+                    $status = 400;
+                }
+            }
+        }
+        catch (\Exception $e) {
+            $data = [];
+            $status = 500;
+            $msg = 'Error occurred while updateing address';
+
+            // Log the error for debugging purposes
+            \Log::error('Error occurred while updateing address.', [
+                'message' => $e->getMessage(),
+                'function called' => 'UserController::update_address',
+            ]);
+        }
+        
+        return $this->response($data,$status,$msg);
     }
 }

@@ -19,16 +19,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'sf/v1', 'middleware' => ['api']], function () {
-    Route::get('/', 'BidWarsController@index');
+//app routes
+Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => 'sf/v1', 'middleware' => ['api','custom_auth']], function () {
+    Route::put('/user_profile', 'UserController@update_profile');
+    Route::post('/add_address', 'UserController@add_new_address');
+    Route::put('/edit_address/{id}', 'UserController@update_address');
 });
 
-
+//auth routes
 Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => '', 'middleware' => ['api']], function () {
     Route::post('/register', 'AuthController@register');
     Route::post('/login', 'AuthController@login');
     Route::post('/logout', 'AuthController@logout')->middleware('custom_auth');
-    Route::get('/getuser', 'AuthController@user')->middleware('custom_auth');
-    Route::resource('/user', 'UserController')->middleware('custom_auth');
-    Route::put('/user_profile', 'UserController@update_profile')->middleware('custom_auth');
+    Route::get('/getuser', 'AuthController@user')->middleware('custom_auth');  
 });
