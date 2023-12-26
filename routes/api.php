@@ -21,9 +21,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //app routes
 Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => 'sf/v1', 'middleware' => ['api','custom_auth']], function () {
+    Route::get('/user_profile', 'UserController@get_profile');
     Route::put('/user_profile', 'UserController@update_profile');
     Route::post('/add_address', 'UserController@add_new_address');
     Route::put('/edit_address/{id}', 'UserController@update_address');
+    
 });
 
 //auth routes

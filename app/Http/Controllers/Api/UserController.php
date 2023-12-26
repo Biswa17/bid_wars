@@ -13,58 +13,38 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+   
+    public function get_profile(Request $request, $id)
     {
-        $user_id  = $request->token_id;
-        $user = User::where('id',$user_id)->first();
-        if($user){
-            $data = $user;
-            $msg = "User Fetched Sucessfully";
-            $status = 200;
-        } 
-        else{
-            $data = [];
-            $msg = "User could not be Fetched";
-            $status = 401;
+        
+        try{
+            $rules = [
+                'field' => 'image',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                $data['validation_errors'] = $errors;
+                $status = 422;
+                $msg = "Validation error";
+            }
+            else{
+
+            }
         }
-        return $this->response($data,$status,$msg);
-    }
+        catch (\Exception $e) {
+            $data = [];
+            $status = 500;
+            $msg = 'Error occurred while createing address';
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+            // Log the error for debugging purposes
+            \Log::error('Error occurred while createing address.', [
+                'message' => $e->getMessage(),
+                'function called' => 'UserController::add_new_address',
+            ]);
+        }
         
     }
 
