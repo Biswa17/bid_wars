@@ -13,25 +13,18 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function get_profile(Request $request, $id)
+    public function get_profile(Request $request)
     {
-        
         try{
-            $rules = [
-                'field' => 'image',
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-            
-            if ($validator->fails()) {
-                $errors = $validator->errors();
-                $data['validation_errors'] = $errors;
-                $status = 422;
-                $msg = "Validation error";
-            }
-            else{
-
-            }
+            $user_id = $request->token_id;
+            $user = User::with('profile', 'addresses')
+                ->select('id', 'name', 'email')
+                ->find($user_id);
+            $user = $user->toArray();
+            $user['profile'] = $user['profile'] ?? [];
+            $data = $user;
+            $status = 200;
+            $msg = 'fetched user successfully';
         }
         catch (\Exception $e) {
             $data = [];
@@ -44,7 +37,8 @@ class UserController extends Controller
                 'function called' => 'UserController::add_new_address',
             ]);
         }
-        
+        return $this->response($data,$status,$msg);
+
     }
 
     /**

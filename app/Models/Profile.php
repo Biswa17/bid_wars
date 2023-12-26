@@ -16,8 +16,4 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function addresses()
-    {
-        return $this->hasMany(ProfileAddress::class);
-    }
 }
