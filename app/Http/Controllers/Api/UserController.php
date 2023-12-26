@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-   
     public function get_profile(Request $request, $id)
     {
         
