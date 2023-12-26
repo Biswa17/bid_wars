@@ -28,5 +28,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => '', 'middle
     Route::post('/register', 'AuthController@register');
     Route::post('/login', 'AuthController@login');
     Route::post('/logout', 'AuthController@logout')->middleware('custom_auth');
-    Route::get('/user', 'AuthController@user')->middleware('custom_auth');
+    Route::get('/getuser', 'AuthController@user')->middleware('custom_auth');
+    Route::resource('/user', 'UserController')->middleware('custom_auth');
+    Route::put('/user_profile', 'UserController@update_profile')->middleware('custom_auth');
 });

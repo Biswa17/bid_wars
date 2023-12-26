@@ -18,7 +18,6 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',];
 
         $validator = Validator::make($request->all(), $rules);
-        p($request->all());
         if ($validator->fails()) {
             $errors = $validator->errors();
             $data['validation_errors'] = $errors;
