@@ -28,6 +28,11 @@ Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => 'sf/v1', 'm
     
 });
 
+//admin routes
+Route::group(['namespace' => 'App\Http\Controllers\Admin', 'prefix' => 'admin/v1', 'middleware' => ['api','admin_auth']], function () {
+    Route::resource('/category', 'CategoryController');
+});
+
 //auth routes
 Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => '', 'middleware' => ['api']], function () {
     Route::post('/register', 'AuthController@register');
