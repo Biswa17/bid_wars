@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {   
-        $rules = ['name' => 'required|string|max:255',
+        $rules = [
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',];
 
@@ -26,7 +26,6 @@ class AuthController extends Controller
         }
         else{
             $user = User::create([
-            'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             ]);

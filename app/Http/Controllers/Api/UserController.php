@@ -17,11 +17,7 @@ class UserController extends Controller
     {
         try{
             $user_id = $request->token_id;
-            $user = User::with('profile', 'addresses')
-                ->select('id', 'name', 'email')
-                ->find($user_id);
-            $user = $user->toArray();
-            $user['profile'] = $user['profile'] ?? [];
+            $user = User::with('profile', 'addresses')->find($user_id);
             $data = $user;
             $status = 200;
             $msg = 'fetched user successfully';
@@ -59,23 +55,25 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update_profile(Request $request)
+    public function create_update_profile(Request $request)
     {   
         try{
             $id  = $request->token_id;
-            $profile = Profile::where('user_id', $id)->first();
-            $rules = [
-                'profile_pic' => 'image',
-            ];
-
-            if (!$profile) {
-                $rules['first_name'] = 'required|string';
-                $rules['last_name'] = 'required|string';
+            $profile = Profile::where('user_id',$id)->first();
+            if($profile){
+                $rules = [
+                    'profile_pic' => 'image',
+                    'first_name' => 'required|string',
+                    'last_name' => 'required|string',
+                ];
             }
-            
-            
+            else{
+                $rules = [
+                    'profile_pic' => 'image'
+                ];
+            }
+
             $validator = Validator::make($request->all(), $rules);
-            
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 $data['validation_errors'] = $errors;
@@ -83,36 +81,31 @@ class UserController extends Controller
                 $msg = "Validation error";
             }
             else{
-                $data = ['user_id' => $id,];
-
-                if ($request->hasFile('profile_pic')) {
-                    $image = $request->file('profile_pic');
+                $data = $request->all();
+                $data['user_id'] = $id;
+                
+                if ($request->hasFile('profile_picture')) {
+                    $image = $request->file('profile_picture');
                     $imageName = 'profile_pic_' . $id . '.' . 'jpeg';
                     $image->move(public_path('images/profile_picture'), $imageName);
                     $path = 'images/profile_picture/' . $imageName;
                     $data['profile_pic'] = $path;
                 }
-                if ($request->has('first_name')) {
-                    $data['first_name'] = $request->input('first_name');
+                elseif(!$profile){
+                    $path = 'images/profile_picture/user.jpeg';
+                    $data['profile_pic'] = $path;
                 }
 
-                if ($request->has('last_name')) {
-                    $data['last_name'] = $request->input('last_name');
-                }
-
-                if ($request->has('phone_number')) {
-                    $data['phone_number'] = $request->input('phone_number');
-                }
 
                 if($profile){
                     $profile->update($data);
+                    $msg = "Profile updated successfully";
                 }
                 else{
                     $profile = Profile::create($data);
+                    $msg = "Profile created successfully";
                 }
-
                 $data = $profile;
-                $msg = "Profile updated successfully";
                 $status = 200;
             }
         }
@@ -129,17 +122,6 @@ class UserController extends Controller
         }
         
         return $this->response($data,$status,$msg);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     public function add_new_address(Request $request){
