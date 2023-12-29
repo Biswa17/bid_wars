@@ -25,12 +25,14 @@ Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => 'sf/v1', 'm
     Route::post('/user_profile', 'UserController@create_update_profile');
     Route::post('/add_address', 'UserController@add_new_address');
     Route::put('/edit_address/{id}', 'UserController@update_address');
+    Route::resource('/products', 'ProductController');
     
 });
 
 //admin routes
 Route::group(['namespace' => 'App\Http\Controllers\Admin', 'prefix' => 'admin/v1', 'middleware' => ['api','admin_auth']], function () {
     Route::resource('/category', 'CategoryController');
+    Route::get('/categories/tree', 'CategoryController@categoryTree');
 });
 
 //auth routes

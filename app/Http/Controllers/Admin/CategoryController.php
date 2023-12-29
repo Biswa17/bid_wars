@@ -177,7 +177,59 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            // Find the category by ID
+            $category = Category::find($id);
+
+            if (!$category) {
+                $data = [];
+                $status = 404;
+                $msg = 'Category not found';
+            } else {
+                // Validate the request
+                $rules = [
+                    'category_name' => 'string',
+                    'cat_image' => 'image',
+                ];
+
+                $validator = Validator::make($request->all(), $rules);
+
+                if ($validator->fails()) {
+                    $errors = $validator->errors();
+                    $data['validation_errors'] = $errors;
+                    $status = 422;
+                    $msg = "Validation error";
+                } else {
+                    // Update the category data
+                    $data = $request->all();
+
+                    if ($request->hasFile('cat_image')) {
+                        $image = $request->file('cat_image');
+                        $imageName = 'cat_image_' . $data['category_name'] . '.' . 'jpeg';
+                        $image->move(public_path('images/category_image'), $imageName);
+                        $path = 'images/category_image/' . $imageName;
+                        $data['category_image'] = $path;
+                    }
+
+                    $category->update($data);
+
+                    $status = 200;
+                    $msg = 'Updated category successfully';
+                }
+            }
+        } catch (\Exception $e) {
+            $data = [];
+            $status = 500;
+            $msg = 'Error occurred while updating category';
+
+            // Log the error for debugging purposes
+            \Log::error('Error occurred while updating category.', [
+                'message' => $e->getMessage(),
+                'function called' => 'CategoryController::update',
+            ]);
+        }
+
+        return $this->response($data, $status, $msg);
     }
 
     /**
@@ -217,5 +269,58 @@ class CategoryController extends Controller
         }
 
         return $this->response($data, $status, $msg);
+    }
+
+
+    public function categoryTree()
+    {
+        try {
+            // Get all categories
+            $categories = Category::where('parent_id', null)->get();
+
+            // Organize categories into a tree structure
+            $categoryTree = $this->buildCategoryTree($categories);
+
+            $data = $categoryTree;
+            $status = 200;
+            $msg = 'Retrieved category tree successfully';
+        } catch (\Exception $e) {
+            $data = [];
+            $status = 500;
+            $msg = 'Error occurred while retrieving category tree';
+
+            // Log the error for debugging purposes
+            \Log::error('Error occurred while retrieving category tree.', [
+                'message' => $e->getMessage(),
+                'function called' => 'CategoryController::categoryTree',
+            ]);
+        }
+
+        return $this->response($data, $status, $msg);
+    }
+
+    /**
+     * Recursively build a category tree structure.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $categories
+     * @param  int|null  $parentId
+     * @return array
+     */
+    private function buildCategoryTree($categories, $parentId = null)
+    {
+        $tree = [];
+
+        foreach ($categories as $category) {
+            if ($category->parent_id == $parentId) {
+                $children_category = Category::where('parent_id', $category->id)->get();
+                $children = $this->buildCategoryTree($children_category, $category->id);
+                if ($children->isNotEmpty()) {
+                    $category->setAttribute('children', $children);
+                }
+                $tree[] = $category;
+            }
+        }
+
+        return collect($tree);
     }
 }
