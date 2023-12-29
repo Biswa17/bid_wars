@@ -256,7 +256,7 @@ class ProductController extends Controller
                         
                     }
                     
-                    $product['images'] = $product_images = ProductImage::where('product_id', $product->id)->orderBy('order_number')->get();
+                    $product['images'] = ProductImage::where('product_id', $product->id)->orderBy('order_number')->get();
                     $data = $product;
                     $status = 200;
                     $msg = 'Updated product successfully';
