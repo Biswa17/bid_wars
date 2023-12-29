@@ -26,6 +26,11 @@ Route::group(['namespace' => 'App\Http\Controllers\Api', 'prefix' => 'sf/v1', 'm
     Route::post('/add_address', 'UserController@add_new_address');
     Route::put('/edit_address/{id}', 'UserController@update_address');
     Route::resource('/products', 'ProductController');
+    Route::post('/create_auction', 'AuctionController@create_auction');
+    Route::get('/get_auction/{auction_id}', 'AuctionController@get_auction');
+    Route::put('/update_auction/{auction_id}', 'AuctionController@update_auction');
+    Route::get('/get_all_auction', 'AuctionController@get_all_auction');
+    
     
 });
 

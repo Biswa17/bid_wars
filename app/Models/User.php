@@ -55,4 +55,8 @@ class User extends Authenticatable
     public function products(){
         return $this->hasMany(Product::class);
     }
+
+    public function auctions(){
+        return $this->hasMany(Auction::class);
+    }
 }
